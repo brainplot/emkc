@@ -4,6 +4,7 @@ class CodeRoom extends React.Component {
         super(props);
 
         this.state = {
+            room_hash: props.room_hash,
             hash: props.hash,
             session: +new Date() + '.' + Math.random(),
             language: 'javascript',
@@ -23,8 +24,11 @@ class CodeRoom extends React.Component {
             readOnly: this.props.read_only
         });
 
+        editor.current_hash = this.props.hash;
+        editor.revisions = [];
+
         axios
-            .get('/coderoom/users/' + this.props.hash)
+            .get('/coderoom/users/' + this.props.room_hash)
             .then(res => {
                 this.setState({
                     users: res.data.payload.users.filter(user => user.user_id !== this.props.user_id)
@@ -32,34 +36,36 @@ class CodeRoom extends React.Component {
             });
 
         editor.onDidChangeModelContent(delta => {
+            console.log('edits', delta)
             if (this.state.modifying) return null;
 
-            this.setState({ new_code: true });
+            var op_hash = editor.current_hash;
+            var current_hash = sha256(editor.getValue());
 
-            io.socket.post(
-                '/coderoom/sync',
-                {
-                    hash: this.state.hash,
-                    session: this.state.session,
-                    delta
-                }
-            );
+            editor.current_hash = current_hash;
+
+            editor.revisions.push({
+                collab: false,
+                op_hash,
+                delta
+            });
+
+            setTimeout(() => {
+                return axios
+                    .post('/coderoom/sync', {
+                        room_hash: this.state.room_hash,
+                        op_hash,
+                        current_hash,
+                        session: this.state.session,
+                        delta
+                    })
+                    .then(res => {
+                        console.log(res);
+                    });
+            }, 2000)
         })
 
-        setInterval(() => {
-            if (!this.state.new_code) return null;
-
-            return axios
-                .post('/coderoom/save', {
-                    hash: this.state.hash,
-                    code: editor.getValue()
-                })
-                .then(() => {
-                    this.setState({ new_code: false });
-                });
-        }, 1000);
-
-        io.socket.on('coderoom_' + this.state.hash, data => {
+        io.socket.on('coderoom_' + this.state.room_hash, data => {
             switch (data.action) {
                 case 'join':
                     if (data.user_id === this.props.user_id) break;
@@ -86,6 +92,40 @@ class CodeRoom extends React.Component {
 
                     this.state.modifying = true;
 
+                    if (data.op_hash !== editor.current_hash) {
+                        // transform
+                        console.log('needs transform');
+                        var operations = [];
+
+                        for (var i = editor.revisions.length - 1; i >= 0; --i) {
+                            if (editor.revisions[i].op_hash === data.op_hash) {
+                                operations = editor.revisions.slice(i);
+                                break;
+                            }
+                        }
+
+                        console.log('operations', operations);
+
+                        operations.forEach(d => {
+                            var change = d.delta.changes[0];
+
+                            const line_delta = change.text !== ''
+                                ? change.text.split('').filter(c => c === '\n').length
+                                : (change.range.endLineNumber - change.range.startLineNumber) * -1;
+
+                            if (change.range.startLineNumber <= data.delta.changes[0].range.startLineNumber) {
+                                data.delta.changes[0].range.startLineNumber += line_delta;
+                                data.delta.changes[0].range.endLineNumber += line_delta;
+                            }
+                        });
+                    }
+
+                    editor.revisions.push({
+                        collab: true,
+                        op_hash: data.op_hash,
+                        delta: data.delta
+                    });
+
                     data.delta.changes.forEach(change => {
                         var range = new monaco.Range(
                             change.range.startLineNumber,
@@ -103,6 +143,8 @@ class CodeRoom extends React.Component {
                             text: change.text,
                             forceMoveMarkers: change.forceMoveMarkers
                         }]);
+
+                        editor.current_hash = sha256(editor.getValue());
 
                         if (flip_ro) editor.updateOptions({readOnly: true});
                     });

@@ -24,15 +24,15 @@ module.exports = (sequelize, DataTypes) => {
                     var letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
                     for (;;) {
-                        instance.hash = '';
+                        instance.room_hash = '';
                         for (var i = 0; i < 6; ++i) {
-                            instance.hash += letters[Math.floor(Math.random() * letters.length)];
+                            instance.room_hash += letters[Math.floor(Math.random() * letters.length)];
                         }
 
                         var dupe = await db.snippets
                             .find_one({
                                 where: {
-                                    hash: instance.hash
+                                    hash: instance.room_hash
                                 }
                             });
 
@@ -43,7 +43,7 @@ module.exports = (sequelize, DataTypes) => {
 
             getterMethods: {
                 url() {
-                    return '/s/' + this.hash;
+                    return '/s/' + this.room_hash;
                 },
 
                 time_ago() {

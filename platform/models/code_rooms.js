@@ -7,8 +7,9 @@ module.exports = (sequelize, DataTypes) => {
                 autoIncrement: true
             },
             user_id: DataTypes.INTEGER,
-            hash: DataTypes.STRING,
+            room_hash: DataTypes.STRING,
             code: DataTypes.TEXT('medium'),
+            hash: DataTypes.STRING,
             created_at: DataTypes.DATE
         },
         {
@@ -17,19 +18,20 @@ module.exports = (sequelize, DataTypes) => {
             hooks: {
                 async beforeCreate(instance) {
                     instance.created_at = util.now();
+                    instance.hash = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
 
                     var letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
                     for (;;) {
-                        instance.hash = '';
+                        instance.room_hash = '';
                         for (var i = 0; i < 6; ++i) {
-                            instance.hash += letters[Math.floor(Math.random() * letters.length)];
+                            instance.room_hash += letters[Math.floor(Math.random() * letters.length)];
                         }
 
                         var dupe = await db.code_rooms
                             .find_one({
                                 where: {
-                                    hash: instance.hash
+                                    hash: instance.room_hash
                                 }
                             });
 
@@ -40,7 +42,7 @@ module.exports = (sequelize, DataTypes) => {
 
             getterMethods: {
                 url() {
-                    return '/r/' + this.hash;
+                    return '/r/' + this.room_hash;
                 }
             }
         }

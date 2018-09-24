@@ -14,6 +14,7 @@
 {% block js %}
     {{ parent() }}
     <script src="/js/sails.io.js"></script>
+    <script src="/lib/sha2/sha256.js"></script>
     <script>var require = { paths: { 'vs': '/lib/monaco/min/vs' } };</script>
     <script src="/lib/monaco/min/vs/loader.js"></script>
     <script src="/lib/monaco/min/vs/editor/editor.main.nls.js"></script>
@@ -24,8 +25,9 @@
     <script>
         ReactDOM.render(
             React.createElement(CodeRoom, {
-                hash: '{{ room.hash }}',
+                room_hash: '{{ room.room_hash }}',
                 code: {{ room.code|json_encode }},
+                hash: '{{ room.hash }}',
                 user_id: {{ req.glob.user_id ? req.glob.user_id : -1 }},
                 read_only: !{{ req.glob.user_id ? req.glob.user_id : 0 }}
             }),
