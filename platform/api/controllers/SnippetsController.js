@@ -61,6 +61,31 @@ module.exports = {
         return res.view();
     },
 
+    list(req, res) {
+        return Promise.resolve(null)
+            .then(() => {
+                return [
+                    db.snippets
+                        .find_all({
+                          // no need to filter, get everything!
+                        })
+                ];
+            })
+            .spread(snippets => {
+                return res.view({
+                    snippets: snippets.map(s => {
+                        return {
+                            snippet_id: s.snippet_id,
+                            snip: s.snip,
+                            hash: s.hash,
+                            user_id: s.user_id,
+                            created_at: s.created_at,
+                        }
+                    })
+                });
+            });
+    },
+
     _config: {}
 
 };

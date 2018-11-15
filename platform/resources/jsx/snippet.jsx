@@ -24,5 +24,4 @@ class Snippet extends React.Component {
             </div>
         )
     }
-
 }

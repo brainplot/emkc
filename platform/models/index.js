@@ -58,4 +58,8 @@ db.user_challenges.belongs_to(db.challenges, { as: 'challenge', foreignKey: 'cha
 db.video_requests.has_one(db.video_request_votes, { as: 'vote', foreignKey: 'video_request_id' });
 db.video_requests.has_many(db.video_request_votes, { as: 'votes', foreignKey: 'video_request_id' });
 
+db.snippets.belongs_to(db.users, { as: 'user', foreignKey: 'user_id' });
+db.users.has_one(db.snippets, { as: 'snippet', foreignKey: 'user_id' });
+db.users.has_many(db.snippets, { as: 'snippets', foreignKey: 'user_id' });
+
 module.exports = db;

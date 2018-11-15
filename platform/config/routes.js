@@ -31,9 +31,11 @@ module.exports.routes = {
 
     'POST /votes/handle/:type/:pk': 'VotesController.handle',
 
+
     'GET /snippets': 'SnippetsController.create',
     'POST /snippets': 'SnippetsController.create',
     'GET /s/:hash': 'SnippetsController.view',
+    'GET /snippets/list': 'SnippetsController.list',
 
     'GET /coderoom/new': 'CodeRoomsController.create',
     'POST /coderoom/sync': 'CodeRoomsController.sync',

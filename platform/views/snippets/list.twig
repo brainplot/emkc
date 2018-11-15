@@ -1,0 +1,31 @@
+{% extends 'master.twig'%}
+{% block title %}Snippets - Engineer Man{% endblock %}
+{% block content %}
+    {% if ({{snippets.length}}) %}
+      {% for snippet in snippets %}
+          <table>
+            <thead>
+                <tr>
+                    <th>Date created</th>
+                    <th>User id</th>
+                    <th>Snippet</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for snippet in snippets %}
+                    <tr>
+                        <td>{{ snippet.created_at }}</td>
+                        <td>{{ snippet.user_id }}</td>
+                        <td class="ql-syntax">{{ snippet.snip }}</td>
+                    </tr>
+                {% endfor %}
+                <script>
+                  $('.ql-syntax').each(function(i, block) {
+                      hljs.highlightBlock(block);
+                  });
+                </script>
+            </tbody>
+          </table>
+      {% endfor %}
+    {% endif %}
+{% endblock %}
