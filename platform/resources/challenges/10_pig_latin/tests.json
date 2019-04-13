@@ -19,9 +19,9 @@
         "official": false,
         "name": "Testing large phrases",
         "input": [
-            ["isyay pphay ayay oodgay anguagelay"],
-            ["ucksday areyay ettypray oolcay"],
-            ["isthay isyay osay andomray atwhay amyay iyay oingday"]
+            ["siay hppay aay oodgay anguagelay"],
+            ["ucksday reay rettypay oolcay"],
+            ["histay siay osay andomray hatway maay Iay oingday"]
         ],
         "output": [
           "is php a good language",
