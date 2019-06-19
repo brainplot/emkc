@@ -20,6 +20,8 @@ module.exports.routes = {
     'POST /challenges/execute/:challenge_id': 'ChallengesController.execute',
     'GET /challenges/:challenge_id/:language': 'ChallengesController.challenge',
 
+    'GET /contests': 'ContestsController.home',
+
     'GET /questions/ask': 'QuestionsController.ask',
     'POST /questions/ask': 'QuestionsController.ask',
     'GET /questions/edit/:question_id': 'QuestionsController.edit',
